@@ -1,8 +1,8 @@
-import pandas as pd
 from sqlalchemy.exc import SQLAlchemyError
-import tabula
-import requests
 import boto3
+import pandas as pd
+import requests
+import tabula
 
 class DataExtractor:
     """
@@ -39,10 +39,6 @@ class DataExtractor:
     """
     def __init__(self, db_connector):
         self.db_connector = db_connector
-        self.pdf_url = "https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf"
-        self.header = {"x-api-key": "yFBQbwXe9J3sd6zWVAMrK6lcxxr0q1lr2PT6DDMX"}
-        self.stores_endpoint = "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{store_number}"
-        self.number_ofStores_endpoint = "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores"
 
     def read_rds_table(self, db_connector, table_name):
         try:

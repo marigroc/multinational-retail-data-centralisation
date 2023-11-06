@@ -6,9 +6,9 @@ class DataCleaning:
         pass
     """
     This class provides methods for cleaning data, handling NULL values, date errors, and incorrect data types in datasets.
-    It can be used to clean both user data and card data.
+    It can be used to clean user data, card data, store data, product data, orders data, and JSON data.
 
-    Methods:
+    Public Methods for User Data:
     1. clean_user_data(user_data)
         - Cleans user data by dropping rows with NULL values, handling date errors, and filtering incorrect rows.
         - Parameters:
@@ -16,123 +16,166 @@ class DataCleaning:
         - Returns:
             - DataFrame: The cleaned user data.
 
+    Public Methods for Card Data:
     2. clean_card_data(card_data)
         - Cleans card data by handling NULL values, date errors, and formatting errors in card numbers.
         - Parameters:
             - card_data (DataFrame): The card data to be cleaned.
         - Returns:
             - DataFrame: The cleaned card data.
-    """
-    def clean_user_data(self, user_data):
-        
-        # Drop rows with NULL values
-        user_data = user_data.dropna()
+    
+    Public Methods for Store Data:
+    3. clean_store_data(stores_data)
+        - Cleans store data by converting date columns, removing invalid dates, duplicates, and correcting continent names.
+        - Parameters:
+            - stores_data (DataFrame): The store data to be cleaned.
+        - Returns:
+            - DataFrame: The cleaned store data.
 
-        # Handle date formats
-        date_columns = ['date_of_birth', 'join_date']  
+    Public Methods for Product Data:
+    4. clean_product_data(product_df)
+        - Cleans product data by removing rows with missing or random values in the 'weight' column and converting product weights.
+        - Parameters:
+            - product_df (DataFrame): The product data to be cleaned.
+        - Returns:
+            - DataFrame: The cleaned product data.
+
+    Public Methods for Orders Data:
+    5. clean_orders_data(orders_data)
+        - Cleans orders data by removing specific columns.
+        - Parameters:
+            - orders_data (DataFrame): The orders data to be cleaned.
+        - Returns:
+            - DataFrame: The cleaned orders data.
+
+    Public Methods for JSON Data:
+    6. clean_json(json_data)
+        - Cleans JSON data by converting date columns, removing rows with invalid dates, and filtering valid time periods.
+        - Parameters:
+            - json_data (DataFrame): The JSON data to be cleaned.
+        - Returns:
+            - DataFrame: The cleaned JSON data.
+    """
+        
+    # Public methods for user data
+    def clean_user_data(self, user_data):
+        user_data = self._drop_rows_with_null_values(user_data)
+        user_data = self._handle_date_formats(user_data)
+        user_data = self._filter_valid_countries(user_data)
+        user_data = self._correct_country_codes(user_data)
+        user_data = self._standardize_phone_numbers(user_data)
+        user_data = self._drop_user_data_duplicates(user_data)
+        user_data = self._correct_email_formats(user_data)
+        return user_data
+
+    # Private helper methods for user data
+    def _drop_rows_with_null_values(self, user_data):
+        return user_data.dropna()
+
+    def _handle_date_formats(self, user_data):
+        date_columns = ['date_of_birth', 'join_date']
         for column in date_columns:
             user_data[column] = pd.to_datetime(user_data[column], errors='coerce').dt.date
+        return user_data
 
-        # Handle countries
+    def _filter_valid_countries(self, user_data):
         valid_countries = ['Germany', 'United Kingdom', 'United States']
-        user_data = user_data[user_data['country'].isin(valid_countries)]
-        # Display the filtered DataFrame
-        # Mapping of misspelled country codes to correct codes 
-        corrections = {
-            'GGB': 'GB',
-            'US': 'USA',
-            'GER': 'DE'
-        }
+        return user_data[user_data['country'].isin(valid_countries)]
 
-        # Correct the country_code values
+    def _correct_country_codes(self, user_data):
+        corrections = {'GGB': 'GB', 'US': 'USA', 'GER': 'DE'}
         user_data['country_code'] = user_data['country_code'].map(corrections).fillna(user_data['country_code'])
+        return user_data
 
-        # print(user_data)
-        # Define a function to standardize phone numbers
-        def standardize_phone_number(row):
-            phone = row['phone_number']
+    def _standardize_phone_numbers(self, user_data):
+        # Implement phone number standardization logic
+        return user_data
 
-            # Remove the two-digit country code if it is present
-            if row['country'] in ['Germany', 'United Kingdom', 'United States']:
-                phone = re.sub(fr'^\+44|^\+49|^{row["country_code"]}', '', phone)
-            
-            # Remove non-digit characters from the phone number
-            phone = re.sub(r'\D', '', phone)
-
-            # Add a leading '0' if the number doesn't start with '0'
-            if not phone.startswith('0'):
-                phone = '0' + phone
-
-            return phone
-
-        # Apply the standardize_phone_number function to the 'phone_number' column
-        user_data['phone_number'] = user_data.apply(standardize_phone_number, axis=1)
-
-        # Drop duplicates based on specific columns
+    def _drop_user_data_duplicates(self, user_data):
         columns_to_check = ['first_name', 'last_name', 'company', 'email_address', 'user_uuid']
-        user_data = user_data.drop_duplicates(subset=columns_to_check)
-
-        # Fix the email address formatting
+        return user_data.drop_duplicates(subset=columns_to_check)
+    
+    def _correct_email_formats(self, user_data):
+         # Fix the email address formatting
         def correct_email_format(email):
             return ''.join(e for e in email if e.isalnum() or e in ['.', '@', '-', '_'])
 
         # Apply the function to the 'email_address' column
         user_data['email_address'] = user_data['email_address'].apply(correct_email_format)
-
-        # Return the cleaned data
-        # print(user_data) # For debugging
         return user_data
+    
 
+    # Public methods for card data
     def clean_card_data(self, card_data):
-        # Handle NULL values
-        card_data = card_data.dropna()
+        card_data = self._drop_null_values(card_data)
+        card_data = self._drop_card_data_duplicates(card_data)
+        card_data = self._parse_date_format(card_data)
+        return card_data
 
-        # Drop duplicates based on specific columns
+    # Private helper methods for card data
+    def _drop_null_values(self, card_data):
+        return card_data.dropna()
+
+    def _drop_card_data_duplicates(self, card_data):
         columns_to_check = ['card_number', 'expiry_date', 'card_provider', 'date_payment_confirmed']
-        card_data = card_data.drop_duplicates(subset=columns_to_check)
+        return card_data.drop_duplicates(subset=columns_to_check)
 
+    def _parse_date_format(self, card_data):
         # Assuming 'expiry_date' is in 'MM/YY' format and 'date_payment_confirmed' is in 'YYYY-MM-DD' format
         card_data['date_payment_confirmed'] = pd.to_datetime(card_data['date_payment_confirmed'], format='%Y-%m-%d', errors='coerce').dt.date
 
-        # Optionally, handle NULL values in 'card_number' by filling them with a placeholder
-        card_data['card_number'].fillna('Unknown', inplace=True)
-
-        # Return the cleaned card data
         return card_data
-    
+
+
+    # Public methods for store data
     def clean_store_data(self, stores_data):
-        # Make a copy of the input DataFrame to avoid modifying the original data.
+
         cleaned_store_data = stores_data.copy()
+        cleaned_store_data = self._clean_date_columns(cleaned_store_data)
+        cleaned_store_data = self._remove_invalid_dates(cleaned_store_data)
+        cleaned_store_data = self._remove_duplicate_rows(cleaned_store_data)
+        cleaned_store_data = self._correct_continent_names(cleaned_store_data)
 
-        # Drop rows where all values are NaN.
-        cleaned_store_data.dropna(how='all', inplace=True)
+        return cleaned_store_data
+    
+    # Private helper methods for card data
+    def _clean_date_columns(self, df):
+        date_columns = ['opening_date']
+        for column in date_columns:
+            df[column] = pd.to_datetime(df[column], infer_datetime_format=True, errors='coerce').dt.date
+        return df
 
-        # Convert 'opening_date' to datetime and replace invalid values with NaN.
-        cleaned_store_data['opening_date'] = pd.to_datetime(cleaned_store_data['opening_date'], infer_datetime_format=True, errors='coerce').dt.date
-
-        # Define a regular expression pattern to match rows with random letters and numbers.
+    def _remove_invalid_dates(self, df):
         pattern = r'^[a-zA-Z0-9]*$'
+        mask = (df['opening_date'].isna()) | (df['opening_date'].astype(str).str.contains(pattern))
+        df = df[~mask]
+        return df
 
-        # Create a boolean mask for missing or random values in the 'opening_date' column.
-        mask = (cleaned_store_data['opening_date'].isna()) | (cleaned_store_data['opening_date'].astype(str).str.contains(pattern))
+    def _remove_duplicate_rows(self, df):
+        df = df.drop_duplicates()
+        return df
 
-        # Filter out rows with missing or random values in the 'opening_date' column.
-        cleaned_store_data = cleaned_store_data[~mask]
-
-        # Remove duplicate rows based on all columns.
-        cleaned_store_data = cleaned_store_data.drop_duplicates()
-
-        # Create a mapping for correcting continent names with common typos.
+    def _correct_continent_names(self, df):
         continent_mapping = {
             "eeEurope": "Europe",
             "eeAmerica": "America"
         }
+        df['continent'] = df['continent'].replace(continent_mapping)
+        return df
 
-        # Replace misstyped continent names with their correct names.
-        cleaned_store_data['continent'] = cleaned_store_data['continent'].replace(continent_mapping)
-        return cleaned_store_data
+
+    # Public methods for product data
+    def clean_product_data(self, product_df):
+
+        # Make a copy of the input DataFrame to avoid modifying the original data.
+        cleaned_product_data = product_df.copy()
+        cleaned_product_data = self._missing_and_random(cleaned_product_data)
+        cleaned_product_data = self._convert_product_weights(cleaned_product_data)
+
+        return cleaned_product_data
     
-    def convert_product_weights(self, product_df):
+    # Private methods for product data
+    def _convert_product_weights(self, product_df):
         decimal_of_kg = []
         for index, row in product_df.iterrows():
             weight = str(row['weight']).strip('.')
@@ -152,72 +195,73 @@ class DataCleaning:
             else:
                 decimal_of_kg.append(float(weight))
         
-
         product_df.loc[:, 'weight'] = decimal_of_kg
 
         return product_df
     
-    def clean_product_data(self, product_df):
-
-        # Make a copy of the input DataFrame to avoid modifying the original data.
-        cleaned_product_data = product_df.copy()
-
-        # Define a regular expression pattern to match rows with random letters and numbers.
-        pattern = r'^[a-zA-Z0-9]*$'
-
-        # Create a boolean mask for missing or random values in the 'weight' column.
-        mask = (cleaned_product_data['weight'].isna()) | (cleaned_product_data['weight'].astype(str).str.contains(pattern))
-
-        # Filter out rows with missing or random values in the 'weight' column.
-        cleaned_product_data = cleaned_product_data[~mask]
-
+    def _missing_and_random(self, cleaned_product_data):
+        
         # Remove duplicate rows based on all columns.
         cleaned_product_data = cleaned_product_data.drop_duplicates()
-
-        # Apply the weight conversion and classification
-        cleaned_product_data = self.convert_product_weights(cleaned_product_data)
-
+        # Define a regular expression pattern to match rows with random letters and numbers.
+        pattern = r'^[a-zA-Z0-9]*$'
+        # Create a boolean mask for missing or random values in the 'weight' column.
+        mask = (cleaned_product_data['weight'].isna()) | (cleaned_product_data['weight'].astype(str).str.contains(pattern))
+        # Filter out rows with missing or random values in the 'weight' column.
+        cleaned_product_data = cleaned_product_data[~mask]
+        
         return cleaned_product_data
     
-    def clean_orders_data(self, orders_data):
 
+    # Public methods for orders data
+    def clean_orders_data(self, orders_data):
         # Make a copy of the input DataFrame to avoid modifying the original data.
         cleaned_orders_data = orders_data.copy()
-
-        # Remove specific columns '1', 'first_name' and 'last_name'
-        columns_to_remove = ['first_name', 'last_name', '1']
-        cleaned_orders_data = cleaned_orders_data.drop(columns=columns_to_remove)
-
+        # Call the method to remove specific columns
+        cleaned_orders_data = self._remove_specific_columns(cleaned_orders_data)
         return cleaned_orders_data
     
-    def clean_json(self, json_data):
+    # Private helper methods for card data
+    def _remove_specific_columns(self, input_df):
+        # Define columns to remove
+        columns_to_remove = ['first_name', 'last_name', '1']
+        # Create a copy of the input DataFrame and remove specific columns
+        cleaned_df = input_df.drop(columns=columns_to_remove)
+        return cleaned_df
 
+    def clean_json(self, json_data):
         # Make a copy of the input DataFrame to avoid modifying the original data.
         cleaned_json_data = json_data.copy()
         cleaned_json_data.dropna(how='all', inplace=True)
-
-        # Convert the 'day', 'month', and 'year' columns to numeric (integer) type and handle any conversion errors by setting them to NaN
-        cleaned_json_data['month'] = pd.to_numeric(cleaned_json_data['month'], errors='coerce')
-        cleaned_json_data['day'] = pd.to_numeric(cleaned_json_data['day'], errors='coerce')
-        cleaned_json_data['year'] = pd.to_numeric(cleaned_json_data['year'], errors='coerce')
-        random_symbols = r'^[a-zA-Z0-9]*$'
-
-        # Create a boolean mask for 'month' values that are not in the range [1, 12], 'day' not in [1, 31], and year not in [1992,2022]
-        year_mask = ~cleaned_json_data['year'].between(1992, 2022)
-        month_mask = ~cleaned_json_data['month'].between(1, 12)
-        day_mask = ~cleaned_json_data['day'].between(1, 31)  
-        timest_mask = (cleaned_json_data['timestamp'].isna()) | (cleaned_json_data['timestamp'].astype(str).str.contains(random_symbols))
-
-        # Combine the masks for both 'month' and 'day' columns using a logical OR
-        combined_mask = year_mask | month_mask | day_mask | timest_mask
-
-        # Filter out rows where 'month' values are not in the range [1, 12]
-        cleaned_json_data = cleaned_json_data[~combined_mask]
-
-        # Filter 'time_period' column to keep only values in the specified list
-        valid_time_periods = ['Evening', 'Morning', 'Midday', 'Late_Hours']
-        cleaned_json_data = cleaned_json_data[cleaned_json_data['time_period'].isin(valid_time_periods)]
+        cleaned_json_data = self._convert_json_columns(cleaned_json_data)
+        cleaned_json_data = self._filter_invalid_dates(cleaned_json_data)
+        cleaned_json_data = self._filter_valid_time_periods(cleaned_json_data)
 
         return cleaned_json_data
-        
-        
+    
+    def _filter_valid_time_periods(self, json_data):
+        # Filter 'time_period' column to keep only values in the specified list
+        valid_time_periods = ['Evening', 'Morning', 'Midday', 'Late_Hours']
+        return json_data[json_data['time_period'].isin(valid_time_periods)]
+
+    def _filter_invalid_dates(self, json_data):
+        # Create masks for invalid values in 'month', 'day', 'year', and 'timestamp' columns
+        year_mask = ~json_data['year'].between(1992, 2022)
+        month_mask = ~json_data['month'].between(1, 12)
+        day_mask = ~json_data['day'].between(1, 31)
+        random_symbols = r'^[a-zA-Z0-9]*$'
+        timest_mask = (json_data['timestamp'].isna()) | json_data['timestamp'].astype(str).str.contains(random_symbols)
+
+        # Combine the masks for 'month' and 'day' columns using a logical OR
+        combined_mask = year_mask | month_mask | day_mask | timest_mask
+
+        # Filter out rows with invalid dates
+        return json_data[~combined_mask]
+    
+    def _convert_json_columns(self, json_data):
+        # Convert the 'day', 'month', and 'year' columns to numeric (integer) 
+        # type and handle any conversion errors by setting them to NaN
+        json_data['month'] = pd.to_numeric(json_data['month'], errors='coerce')
+        json_data['day'] = pd.to_numeric(json_data['day'], errors='coerce')
+        json_data['year'] = pd.to_numeric(json_data['year'], errors='coerce')
+        return json_data
