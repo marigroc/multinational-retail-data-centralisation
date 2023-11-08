@@ -15,7 +15,7 @@ if __name__ == "__main__":
     s3_json = "https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json"
     # Get the list of available tables
     table_names = db_connector.list_db_tables()
-
+    
     user_data_table_name = 'legacy_users'
     order_table_name = "orders_table"
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         print(f"Data uploaded to 'dim_store_details' table successfully.")
     else:
         print("Failed to retrieve data using API key.")
-
+    
     # Extract data from S3
     products_data = data_extractor.extract_from_s3(s3_csv)
     if products_data is not None:
@@ -71,7 +71,7 @@ if __name__ == "__main__":
         print(f"Data uploaded to 'dim_products' table successfully.")
     else:
         print("Failed to retrieve data from the s3 bucket.")
-
+    
     # Extract data from json S3
     json_data = data_extractor.extract_s3_json(s3_json)
     if json_data is not None:
@@ -81,3 +81,4 @@ if __name__ == "__main__":
         print(f"Data uploaded to 'dim_date_time' table successfully.")
     else:
         print("Failed to retrieve data from the json file.")
+   

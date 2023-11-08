@@ -135,6 +135,8 @@ class DataCleaning:
         cleaned_store_data = self._remove_invalid_dates(cleaned_store_data)
         cleaned_store_data = self._remove_duplicate_rows(cleaned_store_data)
         cleaned_store_data = self._correct_continent_names(cleaned_store_data)
+        cleaned_store_data = self._make_numbers(cleaned_store_data)
+        cleaned_store_data = self._remove_non_numeric_staff(cleaned_store_data)
 
         return cleaned_store_data
     
@@ -151,10 +153,23 @@ class DataCleaning:
         df = df[~mask]
         return df
 
+    def _make_numbers(self, df):
+        df['longitude'] = pd.to_numeric(df['longitude'], errors='coerce')
+        df['staff_numbers'] = pd.to_numeric(df['staff_numbers'], errors='coerce')
+        return df
+    
     def _remove_duplicate_rows(self, df):
         df = df.drop_duplicates()
         return df
 
+    def _remove_non_numeric(self, value):
+        return re.sub(r'[^0-9]', '', str(value))
+    
+    def _remove_non_numeric_staff(self, df):
+        df = df.dropna(subset=['staff_numbers'], how='any')
+        df.loc[:, 'staff_numbers'] = df['staff_numbers'].apply(self._remove_non_numeric)
+        return df
+    
     def _correct_continent_names(self, df):
         continent_mapping = {
             "eeEurope": "Europe",

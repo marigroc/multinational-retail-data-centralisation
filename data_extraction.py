@@ -123,7 +123,7 @@ class DataExtractor:
 
         if stores_data:
             stores_df = pd.DataFrame(stores_data)
-            
+            print(stores_df.dtypes)
             return stores_df
         else:
             print("Failed to retrieve store data from the API.")
