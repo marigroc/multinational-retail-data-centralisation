@@ -1,6 +1,5 @@
 import yaml
 from sqlalchemy import create_engine, text
-import pandas as pd
 
 
 class DatabaseConnector:
@@ -32,7 +31,7 @@ class DatabaseConnector:
             - Parameters:
                 - data_df (DataFrame): The data to be uploaded.
                 - table_name (str): The name of the table in the database.
-        
+
         5. close_connection()
             - Closes the database connection if it's open.
 
@@ -54,7 +53,6 @@ class DatabaseConnector:
             return {}
         
     def init_db_engine(self):
-
         db_url = f"postgresql://{self.db_creds['RDS_USER']}:{self.db_creds['RDS_PASSWORD']}@{self.db_creds['RDS_HOST']}:{self.db_creds['RDS_PORT']}/{self.db_creds['RDS_DATABASE']}"
         engine = create_engine(db_url)
         return engine
@@ -64,15 +62,12 @@ class DatabaseConnector:
             query = text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
             result = connection.execute(query)
             table_names = [row[0] for row in result]
-            # print(table_names)
-            
+            # print(table_names)  
         return table_names
 
     def upload_to_db(self, data_df, table_name):
-        
         with open('db_creds_local.yaml') as db_creds_local:
-            creds = yaml.safe_load(db_creds_local)
-        
+            creds = yaml.safe_load(db_creds_local) 
         engine = create_engine(f"{'postgresql'}+{'psycopg2'}://{creds['user']}:{creds['password']}@{creds['host']}:{creds['port']}/{creds['dbname']}")
         engine.connect()
         data_df.to_sql(table_name, engine, if_exists='replace')
