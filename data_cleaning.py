@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 
+
 class DataCleaning:
     def __init__(self):
         pass
@@ -61,8 +62,7 @@ class DataCleaning:
     def _remove_duplicate_rows(self, df, column):
         return df.drop_duplicates(subset=column)
     
-# 1.
-    # Public methods for user data
+# 1. Public methods for user data
     def clean_user_data(self, user_data):
         clean_user_data = user_data.copy()
         clean_user_data = self._drop_rows_with_null_values(clean_user_data)
@@ -94,8 +94,7 @@ class DataCleaning:
         df['phone_number'] = df['phone_number'].apply(lambda phone: '0' + phone if not phone.startswith('0') else phone)
         return df
 
-# 2.
-    # Public methods for card data
+# 2. Public methods for card data
     def clean_card_data(self, card_data):
         clean_card_data = card_data.copy()
         clean_card_data = self._parse_date_format(clean_card_data)
@@ -131,8 +130,7 @@ class DataCleaning:
         df[column_name] = df[column_name].str.replace(r'[^0-9]', '', regex=True)
         return df
 
-# 3.
-    # Public methods for store data
+# 3. Public methods for store data
     def clean_store_data(self, stores_data):
         cleaned_store_data = stores_data.copy()
         cleaned_store_data = self._clean_date_columns(cleaned_store_data)
@@ -178,8 +176,7 @@ class DataCleaning:
         df['continent'] = df['continent'].replace(continent_mapping)
         return df
 
-# 4.
-    # Public methods for product data
+# 4. Public methods for product data
     def clean_product_data(self, product_df):
         cleaned_product_data = product_df.copy()
         cleaned_product_data = self._missing_and_random(cleaned_product_data, column='product_price')
@@ -219,8 +216,7 @@ class DataCleaning:
         df = df[~mask]
         return df
     
-# 5.
-    # Public methods for orders data
+# 5. Public methods for orders data
     def clean_orders_data(self, orders_data):
         cleaned_orders_data = orders_data.copy()
         cleaned_orders_data = self._remove_specific_columns(cleaned_orders_data)
@@ -241,8 +237,7 @@ class DataCleaning:
         df = df.drop(columns=columns_to_remove)
         return df
     
-# 6.
-    # Public methods for datetime
+# 6. Public methods for datetime
     def clean_time(self, time_data):
         clean_time = time_data.copy()
         clean_time.dropna(how='all', inplace=True)

@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 import tabula
 
+
 class DataExtractor:
     """
     This class provides methods for extracting and retrieving data from a relational database, PDF documents,
