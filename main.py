@@ -1,6 +1,9 @@
 from data_extraction import DataExtractor
 from data_cleaning import DataCleaning
 from database_utils import DatabaseConnector
+from dotenv import load_dotenv
+import os
+
 
 """
 Data Processing Script
@@ -31,21 +34,22 @@ Usage:
 
 """
 if __name__ == "__main__":
+    # Load environment variables from the .env file
+    load_dotenv()
     db_connector = DatabaseConnector()
     data_extractor = DataExtractor(db_connector)
     data_cleaner = DataCleaning()
-    pdf_url = "https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf" 
-    num_stores_url = 'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores'
-    store_detail_url = 'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{store_number}'
-    headers = {'x-api-key': 'yFBQbwXe9J3sd6zWVAMrK6lcxxr0q1lr2PT6DDMX'}
-    s3_csv = "s3://data-handling-public/products.csv"
-    s3_json = "https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json"
+    # Access environment variables
+    pdf_url = os.getenv("PDF_URL")
+    num_stores_url = os.getenv("NUM_STORES_URL")
+    store_detail_url = os.getenv("STORE_DETAIL_URL")
+    api_key = os.getenv("API_KEY")
+    s3_csv = os.getenv("S3_CSV")
+    s3_json = os.getenv("S3_JSON")
     # Get the list of available tables
     table_names = db_connector.list_db_tables()
-    
     user_data_table_name = 'legacy_users'
     order_table_name = "orders_table"
-
     # Use read_rds_table to extract the user data and return it as a Pandas DataFrame
     user_data = data_extractor.read_rds_table(db_connector, user_data_table_name)
     orders_data = data_extractor.read_rds_table(db_connector, order_table_name)
@@ -67,7 +71,6 @@ if __name__ == "__main__":
         print(f"Data uploaded to 'orders_table' table successfully.")
     else:
         print(f"Failed to retrieve data from the '{order_table_name}' table.")
-
     # Get the card data, clean, and upload
     extracted_data = data_extractor.retrieve_pdf_data(pdf_url)
     if extracted_data is not None:
@@ -77,7 +80,6 @@ if __name__ == "__main__":
     else:
         print("Failed to retrieve data from pdf.")
     db_connector.close_connection()   
-
     # Load, store, clean and upload store data
     data_extractor = DataExtractor(db_connector)  
     num_stores = data_extractor.list_number_of_stores(num_stores_url, headers)
@@ -88,7 +90,6 @@ if __name__ == "__main__":
         print(f"Data uploaded to 'dim_store_details' table successfully.")
     else:
         print("Failed to retrieve data using API key.")
-    
     # Extract products data from S3
     products_data = data_extractor.extract_from_s3(s3_csv)
     if products_data is not None:
@@ -97,7 +98,6 @@ if __name__ == "__main__":
         print(f"Data uploaded to 'dim_products' table successfully.")
     else:
         print("Failed to retrieve data from the s3 bucket.")
-    
     # Extract time and dates data from json S3
     json_data = data_extractor.extract_s3_json(s3_json)
     if json_data is not None:
