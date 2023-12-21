@@ -2,7 +2,7 @@
 
 ## Table of Contents
 - [Description](#description)
-- [Installation Instructions](#installation-instructions)
+- [Prerequisites](#prerequisites)
 - [Usage Instructions](#usage-instructions)
 - [File Structure](#file-structure)
 - [License Information](#license-information)
@@ -12,10 +12,24 @@ In this project, I addressed the issue of a multinational company selling variou
 
 To achieve this, I utilized my expertise in AWS, SQL, data cleaning with Pandas, and web APIs.
 
-## Milestone 1
+## Prerequisites
+
+Exhaustive list of packages required in this project can be found in requirements.txt.
+
+Install teh required packages:<br>
+- PyYaml
+```bash 
+pip install PyYAML
+```
+- Tabula
+```bash
+pip install tabula-py
+```
+## Usage instructions
+### Milestone 1
 The GitHub repo created and cloned to hte local machine.
 
-## Milestone 2
+### Milestone 2
 
 1. New database sales_data created using pgAdmin 4:<br>
 ![sales_data in pgAdmin 4](image.png)
@@ -107,7 +121,7 @@ The GitHub repo created and cloned to hte local machine.
    - Upload the data to the database naming the table dim_date_times.<br>
    ![dim_date_times table](image-23.png)<br>
 
-## Milestone 3
+### Milestone 3
 
 Create the database schema.
 The ? in VARCHAR should be replaced with an integer representing the maximum length of the values in that column.
@@ -156,7 +170,7 @@ Make the associated changes after finding out what the lengths of each variable 
    ![Alt text](image-39.png)<br>
    ![Alt text](image-40.png)
 
-## Milestone 4
+### Milestone 4
 Querying the data.
 1. How many stores does the business have in which countries?<br>
 ![Alt text](image-41.png)<br>
@@ -186,16 +200,24 @@ Querying the data.
 ![Alt text](image-57.png)<br>
 ![Alt text](image-58.png)
 
-## File Structure
+## File structure
 
-- database_utils.py: Contains the DatabaseConnector class for database connections.
-- data_cleaning.py: Contains the DataCleaning class for data cleaning operations.
-- data_extraction.py: Contains the DataExtractor class for data extraction and retrieval.
-- main.py: Demonstrates how to use the classes to extract, clean, and upload data.
-- star_schema.sql: Contains the SQL queries that create the star-based schema for the database.
-- requirements.txt: Lists the required Python libraries.
-- README.md: This documentation file.
+- README.md
+- data_cleaning.py
+- data_extraction.py
+- database_utils.py
+- main.py
+- star_schema.sql
+- mdrc_data_query.sql
 
 ## License Information
 
-This project is licensed under the MIT License. 
+MIT License
+
+Copyright (c) 2023 marigroc
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
