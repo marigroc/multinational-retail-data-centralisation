@@ -16,7 +16,7 @@ To achieve this, I utilized my expertise in AWS, SQL, data cleaning with Pandas,
 
 Exhaustive list of packages required in this project can be found in requirements.txt.
 
-Install teh required packages:<br>
+Install the required packages:<br>
 - PyYaml
 ```bash 
 pip install PyYAML
